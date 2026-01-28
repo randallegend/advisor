@@ -119,36 +119,27 @@ Trends data is converted to actionable signals:
 
 1. **Trends API Rate Limits**: SerpAPI has request limits; heavy usage may hit quotas
 2. **No Real Ad Platform Integration**: Strategies are recommendations only, not executable campaigns
-3. **Single-Language Support**: Currently English-only for entity extraction and strategy generation
 4. **No Historical Campaign Data**: Cannot learn from past campaign performance
 
 ### AI Limitations
 
 1. **Hallucination Risk**: AI may generate plausible-sounding but incorrect audience sizes or CTR estimates
 2. **Limited Industry Knowledge**: General marketing knowledge, not deep vertical expertise
-3. **No Real-Time Competitor Analysis**: Strategies don't account for competitor activity
-4. **Budget Recommendations Are Heuristic**: Not based on actual ad platform auction dynamics
 
 ### UX Limitations
 
 1. **No Collaborative Editing**: Single-user campaigns only
-2. **Limited Export Formats**: PDF only, no direct platform export
-3. **No A/B Testing Suggestions**: Single strategy per campaign
-
+2. **No A/B Testing Suggestions**: Single strategy per campaign
 ---
 
 ## Future Improvements
 
 ### Short-Term (Next Sprint)
 
-- [ ] Add campaign templates for common use cases
-- [ ] Implement campaign duplication
-- [ ] Add more export formats (CSV, PowerPoint)
+- [ ] Add more export formats
 - [ ] Improve mobile responsiveness
 
 ### Medium-Term (Next Quarter)
-
-- [ ] Multi-language support
 - [ ] Campaign performance tracking (manual input)
 - [ ] Team collaboration features
 - [ ] Custom strategist persona creation
@@ -158,8 +149,6 @@ Trends data is converted to actionable signals:
 - [ ] Direct integration with Google Ads, Meta Ads APIs
 - [ ] Machine learning on campaign outcomes to improve recommendations
 - [ ] Automated A/B test generation
-- [ ] Real-time budget optimization suggestions
-
 ---
 
 ## Prompt Logs
@@ -242,7 +231,6 @@ Return JSON with:
 
 ### State Management
 - React useState for local component state
-- No global state management (Redux/Zustand) - kept simple for hackathon scope
 - Supabase for persistent storage
 
 ### Key Design Decisions
@@ -259,6 +247,6 @@ Return JSON with:
 
 ## Credits
 
-Built for the Anthropic Hackathon 2025
+Built for the MediaJel Hackathon 2026
 
 **Tech Stack**: Next.js 16, TypeScript, Tailwind CSS, Supabase, Anthropic Claude API, SerpAPI

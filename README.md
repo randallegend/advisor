@@ -27,25 +27,19 @@ AI-powered advertising campaign strategy generator. Create data-driven media pla
 
 ## Setup
 
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd omnimind
-   ```
-
-2. Install dependencies:
+1. Install dependencies:
    ```bash
    npm install
    ```
 
-3. Add the `.env` file (download from Google Drive submission)
+2. Add the `.env` file (download from Google Drive submission)
 
-4. Run the development server:
+3. Run the development server:
    ```bash
    npm run dev
    ```
 
-5. Open [http://localhost:3000](http://localhost:3000)
+4. Open [http://localhost:3000](http://localhost:3000)
 
 ## Sample Simple Usage
 

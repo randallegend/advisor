@@ -5,6 +5,31 @@ import { resolveGeoLocation } from "@/lib/geoHelpers";
 
 const SERPAPI_KEY = process.env.NEXT_SERPAPI_KEY;
 
+function serpApiCall(params: Record<string, any>, retries = 3, timeoutMs = 15000): Promise<any> {
+  return new Promise((resolve, reject) => {
+    let attempt = 0;
+
+    const tryCall = () => {
+      attempt++;
+      const timer = setTimeout(() => {
+        if (attempt < retries) {
+          console.warn(`SerpAPI timeout (attempt ${attempt}/${retries}), retrying...`);
+          tryCall();
+        } else {
+          reject(new Error("SerpAPI request timed out after all retries"));
+        }
+      }, timeoutMs);
+
+      getJson(params, (data) => {
+        clearTimeout(timer);
+        resolve(data);
+      });
+    };
+
+    tryCall();
+  });
+}
+
 export interface TrendsTimelinePoint {
   date: string;
   values: { query: string; value: number }[];
@@ -40,35 +65,25 @@ export async function getExploreTrends(
     const geo = location ? resolveGeoLocation(location) : "";
     const query = cleanKeywords.join(",");
 
-    // Fetch timeseries and related queries in parallel
+    // Fetch timeseries and related queries in parallel (with retry)
     const [timeseriesData, relatedData] = await Promise.all([
-      new Promise<any>((resolve) => {
-        getJson(
-          {
-            engine: "google_trends",
-            q: query,
-            date: "today 3-m",
-            geo: geo || undefined,
-            tz: "420",
-            data_type: "TIMESERIES",
-            api_key: SERPAPI_KEY,
-          },
-          (data) => resolve(data)
-        );
+      serpApiCall({
+        engine: "google_trends",
+        q: query,
+        date: "today 3-m",
+        geo: geo || undefined,
+        tz: "420",
+        data_type: "TIMESERIES",
+        api_key: SERPAPI_KEY,
       }),
-      new Promise<any>((resolve) => {
-        getJson(
-          {
-            engine: "google_trends",
-            q: cleanKeywords[0],
-            date: "today 3-m",
-            geo: geo || undefined,
-            tz: "420",
-            data_type: "RELATED_QUERIES",
-            api_key: SERPAPI_KEY,
-          },
-          (data) => resolve(data)
-        );
+      serpApiCall({
+        engine: "google_trends",
+        q: cleanKeywords[0],
+        date: "today 3-m",
+        geo: geo || undefined,
+        tz: "420",
+        data_type: "RELATED_QUERIES",
+        api_key: SERPAPI_KEY,
       }),
     ]);
 

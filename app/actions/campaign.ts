@@ -19,6 +19,31 @@ import type {
 const anthropic = new Anthropic();
 const SERPAPI_KEY = process.env.NEXT_SERPAPI_KEY;
 
+function serpApiCall(params: Record<string, any>, retries = 3, timeoutMs = 15000): Promise<any> {
+  return new Promise((resolve, reject) => {
+    let attempt = 0;
+
+    const tryCall = () => {
+      attempt++;
+      const timer = setTimeout(() => {
+        if (attempt < retries) {
+          console.warn(`SerpAPI timeout (attempt ${attempt}/${retries}), retrying...`);
+          tryCall();
+        } else {
+          reject(new Error("SerpAPI request timed out after all retries"));
+        }
+      }, timeoutMs);
+
+      getJson(params, (data) => {
+        clearTimeout(timer);
+        resolve(data);
+      });
+    };
+
+    tryCall();
+  });
+}
+
 export async function extractCampaignEntities(userPrompt: string) {
   try {
     const message = await anthropic.messages.create({
@@ -229,77 +254,72 @@ export async function getTrends(entities: CampaignEntities) {
         error: "No keywords provided for trends analysis",
       };
     }
-    // 6. Call SerpAPI
-    return new Promise(async (resolve, reject) => {
-      getJson(
-        {
-          engine: "google_trends",
-          q: query,
-          date: dateRange,
-          geo: geoCode,
-          tz: "420",
-          data_type: "TIMESERIES",
-          api_key: SERPAPI_KEY,
-        },
-        async (data) => {
-          const trendsData = data as TrendsResponse;
-          if (trendsData.interest_over_time) {
-            // Compute trend signals from actual data
-            const signals = computeTrendSignal(
-              trendsData.interest_over_time.timeline_data
-            );
-
-            // Compute confidence based on signals and data source
-            const confidence = computeConfidence(signals, "data", entities.location, true);
-
-            // Generate explanation message
-            const initialMessage = await generateSignalsExplanation(entities, signals);
-
-            resolve({
-              success: true,
-              data: trendsData.interest_over_time.timeline_data,
-              metadata: {
-                query,
-                dateRange,
-                geo: geoCode || "Worldwide",
-                location: entities.location,
-                eventDate: eventDate?.toISOString() || null,
-                eventType: effectiveEventType,
-                signals,
-                signalSource: "data",
-                initialMessage,
-                confidence,
-              },
-            });
-          } else {
-            // AI fallback when no trends data available
-            const signals = await getTrendAI(entities);
-
-            // Compute confidence based on signals and data source (lower for AI inference)
-            const confidence = computeConfidence(signals, "ai", entities.location, false);
-
-            const initialMessage = await generateSignalsExplanation(entities, signals);
-
-            resolve({
-              success: true,
-              data: [],
-              metadata: {
-                query,
-                dateRange,
-                geo: geoCode || "Worldwide",
-                location: entities.location,
-                eventDate: eventDate?.toISOString() || null,
-                eventType: effectiveEventType,
-                signals,
-                signalSource: "ai",
-                initialMessage,
-                confidence,
-              },
-            });
-          }
-        }
-      );
+    // 6. Call SerpAPI (with retry)
+    const data = await serpApiCall({
+      engine: "google_trends",
+      q: query,
+      date: dateRange,
+      geo: geoCode,
+      tz: "420",
+      data_type: "TIMESERIES",
+      api_key: SERPAPI_KEY,
     });
+
+    const trendsData = data as TrendsResponse;
+    if (trendsData.interest_over_time) {
+      // Compute trend signals from actual data
+      const signals = computeTrendSignal(
+        trendsData.interest_over_time.timeline_data
+      );
+
+      // Compute confidence based on signals and data source
+      const confidence = computeConfidence(signals, "data", entities.location, true);
+
+      // Generate explanation message
+      const initialMessage = await generateSignalsExplanation(entities, signals);
+
+      return {
+        success: true,
+        data: trendsData.interest_over_time.timeline_data,
+        metadata: {
+          query,
+          dateRange,
+          geo: geoCode || "Worldwide",
+          location: entities.location,
+          eventDate: eventDate?.toISOString() || null,
+          eventType: effectiveEventType,
+          signals,
+          signalSource: "data",
+          initialMessage,
+          confidence,
+        },
+      };
+    } else {
+      // AI fallback when no trends data available
+      const signals = await getTrendAI(entities);
+
+      // Compute confidence based on signals and data source (lower for AI inference)
+      const confidence = computeConfidence(signals, "ai", entities.location, false);
+
+      const initialMessage = await generateSignalsExplanation(entities, signals);
+
+      return {
+        success: true,
+        data: [],
+        metadata: {
+          query,
+          dateRange,
+          geo: geoCode || "Worldwide",
+          location: entities.location,
+          eventDate: eventDate?.toISOString() || null,
+          eventType: effectiveEventType,
+          signals,
+          signalSource: "ai",
+          initialMessage,
+          confidence,
+        },
+      };
+    }
   } catch (error) {
     console.error("Trends API error:", error);
     return { success: false, error: String(error) };

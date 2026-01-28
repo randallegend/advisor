@@ -47,7 +47,7 @@ AI-powered advertising campaign strategy generator. Create data-driven media pla
 
 5. Open [http://localhost:3000](http://localhost:3000)
 
-## Usage
+## Sample Simple Usage
 
 1. Sign in or create an account
 2. Select an AI strategist

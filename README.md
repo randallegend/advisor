@@ -32,7 +32,7 @@ AI-powered advertising campaign strategy generator. Create data-driven media pla
    npm install
    ```
 
-2. Add the `.env` file (download from Google Drive submission)
+2. Add the `.env` file (already in project in Google Drive Submission)
 
 3. Run the development server:
    ```bash

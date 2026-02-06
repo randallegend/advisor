@@ -568,14 +568,16 @@ CONVERSATION GUIDELINES:
 - ONLY include "changes" when the user clearly requests campaign modifications (e.g., "allocate more to X", "focus on Y audiences", "increase Z budget").
 
 What you CAN modify (only when requested):
-1. **funnel_weights** - Adjust budget allocation across awareness/consideration/conversion (must sum to 1.0)
-2. **audience_strategy** - Replace or update audience segments with new targeting
-3. **ad_format_weights** - Change ad format allocation (must sum to 1.0)
+1. **budget** - Change the total campaign budget (must be between 1000 and 100000)
+2. **funnel_weights** - Adjust budget allocation across awareness/consideration/conversion (must sum to 1.0)
+3. **audience_strategy** - Replace or update audience segments with new targeting
+4. **ad_format_weights** - Change ad format allocation (must sum to 1.0)
 
 Return ONLY valid JSON (no markdown, no code fences) in this exact structure:
 {
   "message": "Brief explanation (1-2 sentences max)",
   "changes": {
+    "budget": 25000,
     "funnel_weights": {
       "awareness": 0.45,
       "consideration": 0.25,
@@ -601,6 +603,7 @@ IMPORTANT RULES:
 - Only include fields in "changes" that are relevant to the user's request
 - If no modifications are requested, omit "changes" entirely
 - If greeting or off-topic, omit "changes" and redirect to campaign strategy
+- Budget must be between $1,000 and $100,000
 - Weights must sum to 1.0 (normalize if needed)
 - Keep messages concise and strategic, not salesy`;
 

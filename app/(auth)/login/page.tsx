@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AuthLayout } from "@/components/AuthLayout";
 import { login } from "../actions";
 
-export default function LoginPage() {
+function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
@@ -25,7 +25,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthLayout>
+    <>
       <div className="glass rounded-3xl p-8 shadow-2xl shadow-[#8A2BE2]/10">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
@@ -155,6 +155,16 @@ export default function LoginPage() {
           Privacy Policy
         </a>
       </p>
+    </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <AuthLayout>
+      <Suspense>
+        <LoginForm />
+      </Suspense>
     </AuthLayout>
   );
 }

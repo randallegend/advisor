@@ -189,6 +189,12 @@ export default function CampaignBuilder({
 
         // Apply changes if any
         if (aiResponse.changes) {
+          // Apply budget change
+          if (aiResponse.changes.budget) {
+            const newBudget = Math.max(1000, Math.min(100000, aiResponse.changes.budget));
+            setBudget(newBudget);
+          }
+
           // Apply funnel weight changes
           if (aiResponse.changes.funnel_weights) {
             const weights = aiResponse.changes.funnel_weights;

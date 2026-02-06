@@ -143,6 +143,7 @@ export interface CampaignData {
 export interface AIChatResponse {
   message: string;
   changes?: {
+    budget?: number; // New total campaign budget (between 1000 and 100000)
     funnel_weights?: {
       awareness: number;
       consideration: number;
